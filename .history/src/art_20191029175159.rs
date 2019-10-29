@@ -111,23 +111,13 @@ impl<V> Art<V> {
     where 
         I: 'a + Iterator<Item = u8>,
     {
-        let mut depth: usize;
-        let mut parent = self.root;
-        let mut child: &'a mut NodeBox<V>;
-        let mut index: u8;
-        let mut length: u8;
-        let mut cur_node = self.root;
-        while key.peek() != None {
-            let (header, body) = cur_node.deref().unwrap(); //returns NodeBox's inner: (header, b)
-            let mut i = 0;
-            while (i < header.length) && (key.peek() != None) {
-                let cur_key = key.peek().unwrap();
-                if header.key[i] == cur_key {
-                    key.next();
-                } else {
+        usize depth;
+        Option<&'a mut NodeBox<V>> parent;
+        &'a mut NodeBox<V> child;
+        u8 index;
+        u8 length;
+        while key.next() != None {
 
-                }
-            }
         }
         //write function which searches for node with header.key == rest of the key, where key gets shrinking while searching. 
         //while searching, save pointer to the previously searched node, as it will become the parent

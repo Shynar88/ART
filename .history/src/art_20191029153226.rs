@@ -81,9 +81,9 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
             return None;
         }
 
-        let (header, body) = self.cursor.child.deref_mut().unwrap(); //returns NodeBox's inner: (header, b)
+        let (header, body) = self.cursor.child.deref_mut().unwrap(); //returns NodeBox's inner
         assert_eq!(self.cursor.length, header.length());
-        body.right() //is a reference to the leaf node's value
+        body.right()
     }
 }
 
@@ -108,27 +108,9 @@ impl<V> Art<V> {
     }
 
     fn cursor<'a, I>(&'a mut self, key: &mut Peekable<I>) -> Cursor<'a, V> //(ART, whole key) -> Cursor
-    where 
+    where
         I: 'a + Iterator<Item = u8>,
     {
-        let mut depth: usize;
-        let mut parent = self.root;
-        let mut child: &'a mut NodeBox<V>;
-        let mut index: u8;
-        let mut length: u8;
-        let mut cur_node = self.root;
-        while key.peek() != None {
-            let (header, body) = cur_node.deref().unwrap(); //returns NodeBox's inner: (header, b)
-            let mut i = 0;
-            while (i < header.length) && (key.peek() != None) {
-                let cur_key = key.peek().unwrap();
-                if header.key[i] == cur_key {
-                    key.next();
-                } else {
-
-                }
-            }
-        }
         //write function which searches for node with header.key == rest of the key, where key gets shrinking while searching. 
         //while searching, save pointer to the previously searched node, as it will become the parent
         //keep count of the depth  

@@ -119,13 +119,12 @@ impl<V> Art<V> {
         let mut cur_node = self.root;
         while key.peek() != None {
             let (header, body) = cur_node.deref().unwrap(); //returns NodeBox's inner: (header, b)
-            let mut i = 0;
-            while (i < header.length) && (key.peek() != None) {
+            for i in 0..header.length {
                 let cur_key = key.peek().unwrap();
                 if header.key[i] == cur_key {
-                    key.next();
+                    key.next()
                 } else {
-
+                    
                 }
             }
         }

@@ -119,15 +119,10 @@ impl<V> Art<V> {
         let mut cur_node = self.root;
         while key.peek() != None {
             let (header, body) = cur_node.deref().unwrap(); //returns NodeBox's inner: (header, b)
-            let mut i = 0;
-            while (i < header.length) && (key.peek() != None) {
-                let cur_key = key.peek().unwrap();
-                if header.key[i] == cur_key {
-                    key.next();
-                } else {
-
-                }
+            for x in 0..header.length {
+                
             }
+            key.next();
         }
         //write function which searches for node with header.key == rest of the key, where key gets shrinking while searching. 
         //while searching, save pointer to the previously searched node, as it will become the parent
