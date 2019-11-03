@@ -45,7 +45,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
         let (h, b) = self.cursor.child.deref_mut().unwrap();
         if self.cursor.length != (h.length() as u8) {
             // let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
-            //expantion.  newi on shrinked key 
+            //expantion
         } else {
             let f_key = *self.key.peek().unwrap();
             let (node_box, node_body_v) = NodeBox::new_path(self.key, f);

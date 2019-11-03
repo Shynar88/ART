@@ -42,35 +42,13 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     where
         F: FnOnce() -> V,
     {
-        let (h, b) = self.cursor.child.deref_mut().unwrap();
-        if self.cursor.length != (h.length() as u8) {
-            // let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
-            //expantion.  newi on shrinked key 
+        if self.cursor.length != (self.key.count() as u8) {
+            //expantion
         } else {
-            let f_key = *self.key.peek().unwrap();
+            let f_key = key.peek()
             let (node_box, node_body_v) = NodeBox::new_path(self.key, f);
-            let (header, b) = self.cursor.child.deref_mut().unwrap();
-            let body = b.left().unwrap();
-            let result = body.update(f_key, node_box);
-            match result {
-                Ok((i, n)) => {
-                    Ok(node_body_v)
-                },
-                Err(e) => {
-                    let children = body.extract_children();
-                    let new_box = NodeBox::newi(*header, children, children.len() + 1);
-                    let (n_h, n_b) = new_box.deref_mut().unwrap();
-                    let new_body = n_b.left().unwrap();
-                    let (p_h, p_b) = self.cursor.parent.unwrap().deref_mut().unwrap();
-                    let parent_body = p_b.left().unwrap();
-                    let result = new_body.update(f_key, node_box); //insertion
-                    parent_body.delete(self.cursor.index);
-                    parent_body.update(f_key, new_box);//reference in parent update 
-                    Ok(node_body_v)
-                },
-            }
-            // Err((self.cursor.child.deref_mut().unwrap().1.right().unwrap(), f))
-            // Err((,f)) cursor.child.1.right.unwrap if key.peek is none
+            let (header, body) = self.cursor.child.deref_mut().unwrap();
+            body.left().unwrap().update(self.key, node_box);
         }
         unimplemented!()
     }
@@ -177,7 +155,7 @@ impl<V> Art<V> {
                     cur_node = n; //moving to the next box
                 },
                 None => {
-                    break;
+                    break
                     }, 
             }
         }

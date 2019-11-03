@@ -42,37 +42,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     where
         F: FnOnce() -> V,
     {
-        let (h, b) = self.cursor.child.deref_mut().unwrap();
-        if self.cursor.length != (h.length() as u8) {
-            // let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
-            //expantion.  newi on shrinked key 
-        } else {
-            let f_key = *self.key.peek().unwrap();
-            let (node_box, node_body_v) = NodeBox::new_path(self.key, f);
-            let (header, b) = self.cursor.child.deref_mut().unwrap();
-            let body = b.left().unwrap();
-            let result = body.update(f_key, node_box);
-            match result {
-                Ok((i, n)) => {
-                    Ok(node_body_v)
-                },
-                Err(e) => {
-                    let children = body.extract_children();
-                    let new_box = NodeBox::newi(*header, children, children.len() + 1);
-                    let (n_h, n_b) = new_box.deref_mut().unwrap();
-                    let new_body = n_b.left().unwrap();
-                    let (p_h, p_b) = self.cursor.parent.unwrap().deref_mut().unwrap();
-                    let parent_body = p_b.left().unwrap();
-                    let result = new_body.update(f_key, node_box); //insertion
-                    parent_body.delete(self.cursor.index);
-                    parent_body.update(f_key, new_box);//reference in parent update 
-                    Ok(node_body_v)
-                },
-            }
-            // Err((self.cursor.child.deref_mut().unwrap().1.right().unwrap(), f))
-            // Err((,f)) cursor.child.1.right.unwrap if key.peek is none
-        }
-        unimplemented!()
+        unimplemented!() //call insert on remaining key (new_path?)
     }
 
     /// Inserts the given value if the entry is vacant.
@@ -141,54 +111,57 @@ impl<V> Art<V> {
     where 
         I: 'a + Iterator<Item = u8>,
     {
-        let mut cur_node = &mut self.root;
-        let mut parent = None;
-        let mut length = 0;
-        let mut depth = 0;
-        let mut index = 0;
-        loop {
-            let (header, b) = (unsafe {&mut *(cur_node as *mut NodeBox<V>)}).deref_mut().unwrap();
-            let body = b.left().unwrap();
-            length = 0; //resetting variable
-            for i in 0..header.key().len() {
-                match key.peek(){
-                    None => {break},
-                    Some(v) => {
-                        if *v == header.key()[i] {
-                            key.next();
-                            length += 1;
-                            depth += 1;
-                        } else { // case when cursor points to edge, and value is not yet there. construct cursor; we return edge
-                            break;
-                        }
-                    },
-                } 
+        let mut cur_node = self.root;
+        while True {
+            let ptr = cur_node.inner;
+            let node = unsafe { Box::from_raw(ptr as *mut CachePadded<(NodeHeader, NodeBodyV<V>)>) };
+            let (header, body) = CachePadded::into_inner(*node);
+            key = key.next();
+            for i in range(0, header.key.len()) {
+                if key == KEY_ENDMARK {
+                    //construct cursor; we return edge
+                }
+                key = key.next();
             }
-            if key.peek() == None || header.key().len() < length {
-                break;
-            }
-
-            //if out of the loop, then if key.next() is endmark we need to return value, else, continue traversing to next node
-            let result = body.lookup_mut(*key.peek().unwrap()); //might fail if key doesn't exist
-            match result {
-                Some((i, n)) => {
-                    index = i;
-                    parent = Some(unsafe {&mut *(cur_node as *mut NodeBox<V>)});
-                    cur_node = n; //moving to the next box
-                },
-                None => {
-                    break;
-                    }, 
-            }
+            let (index, node_box) = body.lookup(key);
+            cur_node = node_box;
+            if cur_node
         }
-        //return Cursor here
-        Cursor {
-                depth: depth,
-                parent: parent,
-                child: cur_node,
-                index: index,
-                length: length as u8
-            }
+        node = root
+        while True:
+            key = key.next()
+            if key == key endmark:
+                //we are in NodeBoxV, extract value
+                value = node.inner 
+                break
+            for child in children:
+                    if child.header.key[0] == key:
+                        node = child 
+        //have to handle 3 cases: 
+        //1:when key < key in the header
+        //2:when key == key in the header
+        //3:when key > key in the header
+        // let mut depth: usize; //can be derived from the while loop
+        // let mut parent = self.root; // should store pointer to previous node
+        // let mut child: &'a mut NodeBox<V>; // can be found from nodebody
+        // let mut index: u8; 
+        // let mut length: u8;
+        // let mut cur_node = self.root;
+        // while key.peek() != None {
+        //     let (header, body) = cur_node.deref().unwrap(); //returns NodeBox's inner: (header, b)
+        //     let mut i = 0;
+        //     while (i < header.length) && (key.peek() != None) {
+        //         let cur_key = key.peek().unwrap();
+        //         if header.key[i] == cur_key {
+        //             key.next();
+        //         } else {
+
+        //         }
+        //     }
+        // }
+        //write function which searches for node with header.key == rest of the key, where key gets shrinking while searching. 
+        //while searching, save pointer to the previously searched node, as it will become the parent
+        //keep count of the depth  
     }
 
     /// Creates an entry.

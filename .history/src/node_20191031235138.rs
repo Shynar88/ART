@@ -448,7 +448,7 @@ impl<V> NodeBox<V> {
         F: FnOnce() -> V,
     {
         let key = key.collect::<Vec<_>>(); //convert key to list of bytes
-        let mut chunks = key.rchunks(NodeHeader::MAX_LENGTH); //in max_len is 3, and key is [h,e,l,o,h,a,l,l,o], then return will be [l,l,o], then [o,h,a]
+        let mut chunks = key.rchunks(NodeHeader::MAX_LENGTH); //in max_len is 3, and key is [h,a,l,l,o], then return will be [l,l,o], then [h,a]
         let first_chunk = chunks.next().unwrap(); //this will be [l, l, o]
 
         let mut node = Self::newv(NodeHeader::new(first_chunk).unwrap(), f()); //Nodeheader(length:4, key = [l,l,o]), V -> NodeBox(V)
@@ -457,15 +457,14 @@ impl<V> NodeBox<V> {
         let result = node.deref_mut().unwrap().1.right().unwrap() as *const V; //deref_mut returns value at address. 
         //1: selects Either from unwrapped tuple. bcs it is leaf node we make Right(`value`)
         //where `value` is a reference to the leaf node's value(pointer to NodeBodyV<V>)
-        for chunk in chunks { //starts from [o,h,a]. then it becomes [h,e,l]
+        for chunk in chunks { //starts from [h,a]
             let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
-            // inputs are Nodeheader(len(chunk), and key = [o,h,a]), [('l', NodeBox(leaf type))], minsize)
-            //parent is NodeBox with header having its part of chunk, and one child with prev key and prev node. to leaf is appended newer nodes.
-            key = *unsafe { chunk.get_unchecked(0) }; //becomes 'o'
+            // inputs are Nodeheader(len(chunk), and key = chunk), [('char', NodeBox(leaf type))], minsize)
+            key = *unsafe { chunk.get_unchecked(0) }; //becomes 'h'
             node = parent;
         }
 
-        (node, result)  //tuple of the very parent node and the leaf
+        (node, result)  
     }
 
     /// Creates a null `NodeBox`.

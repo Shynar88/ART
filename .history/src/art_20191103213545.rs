@@ -42,37 +42,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     where
         F: FnOnce() -> V,
     {
-        let (h, b) = self.cursor.child.deref_mut().unwrap();
-        if self.cursor.length != (h.length() as u8) {
-            // let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
-            //expantion.  newi on shrinked key 
-        } else {
-            let f_key = *self.key.peek().unwrap();
-            let (node_box, node_body_v) = NodeBox::new_path(self.key, f);
-            let (header, b) = self.cursor.child.deref_mut().unwrap();
-            let body = b.left().unwrap();
-            let result = body.update(f_key, node_box);
-            match result {
-                Ok((i, n)) => {
-                    Ok(node_body_v)
-                },
-                Err(e) => {
-                    let children = body.extract_children();
-                    let new_box = NodeBox::newi(*header, children, children.len() + 1);
-                    let (n_h, n_b) = new_box.deref_mut().unwrap();
-                    let new_body = n_b.left().unwrap();
-                    let (p_h, p_b) = self.cursor.parent.unwrap().deref_mut().unwrap();
-                    let parent_body = p_b.left().unwrap();
-                    let result = new_body.update(f_key, node_box); //insertion
-                    parent_body.delete(self.cursor.index);
-                    parent_body.update(f_key, new_box);//reference in parent update 
-                    Ok(node_body_v)
-                },
-            }
-            // Err((self.cursor.child.deref_mut().unwrap().1.right().unwrap(), f))
-            // Err((,f)) cursor.child.1.right.unwrap if key.peek is none
-        }
-        unimplemented!()
+        unimplemented!() //call insert on remaining key (new_path?)
     }
 
     /// Inserts the given value if the entry is vacant.
@@ -147,9 +117,8 @@ impl<V> Art<V> {
         let mut depth = 0;
         let mut index = 0;
         loop {
-            let (header, b) = (unsafe {&mut *(cur_node as *mut NodeBox<V>)}).deref_mut().unwrap();
+            let (header, b) = cur_node.deref_mut().unwrap();
             let body = b.left().unwrap();
-            length = 0; //resetting variable
             for i in 0..header.key().len() {
                 match key.peek(){
                     None => {break},
@@ -169,15 +138,16 @@ impl<V> Art<V> {
             }
 
             //if out of the loop, then if key.next() is endmark we need to return value, else, continue traversing to next node
+            length = 0; //resetting variable
             let result = body.lookup_mut(*key.peek().unwrap()); //might fail if key doesn't exist
             match result {
                 Some((i, n)) => {
                     index = i;
-                    parent = Some(unsafe {&mut *(cur_node as *mut NodeBox<V>)});
+                    parent = cur_node;
                     cur_node = n; //moving to the next box
                 },
                 None => {
-                    break;
+                    break
                     }, 
             }
         }
@@ -187,7 +157,7 @@ impl<V> Art<V> {
                 parent: parent,
                 child: cur_node,
                 index: index,
-                length: length as u8
+                length: length
             }
     }
 

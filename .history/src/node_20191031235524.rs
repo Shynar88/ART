@@ -459,13 +459,13 @@ impl<V> NodeBox<V> {
         //where `value` is a reference to the leaf node's value(pointer to NodeBodyV<V>)
         for chunk in chunks { //starts from [o,h,a]. then it becomes [h,e,l]
             let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
-            // inputs are Nodeheader(len(chunk), and key = [o,h,a]), [('l', NodeBox(leaf type))], minsize)
+            // inputs are Nodeheader(len(chunk), and key = chunk), [('char', NodeBox(leaf type))], minsize)
             //parent is NodeBox with header having its part of chunk, and one child with prev key and prev node. to leaf is appended newer nodes.
             key = *unsafe { chunk.get_unchecked(0) }; //becomes 'o'
             node = parent;
         }
 
-        (node, result)  //tuple of the very parent node and the leaf
+        (node, result)  
     }
 
     /// Creates a null `NodeBox`.
