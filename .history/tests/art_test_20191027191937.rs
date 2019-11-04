@@ -55,29 +55,12 @@ fn regression_lookup_single_key() {
 #[test]
 fn regression_delete_after_enlarge() {
     let mut art = Art::<usize>::new();
-    assert!(art.insert("ABCDE", 1).is_ok());
-    assert!(art.insert("ABCD", 2).is_ok());
-    assert!(art.insert("ABC", 3).is_ok());
-    assert!(art.insert("AB", 4).is_ok());
-    assert!(art.insert("A", 5).is_ok());
+    assert!(art.insert("AA", 2).is_ok());
+    assert!(art.insert("AB", 3).is_ok());
+    assert!(art.insert("AC", 3).is_ok());
+    assert!(art.insert("AD", 3).is_ok());
+    assert!(art.insert("A", 1).is_ok());
     assert!(art.delete("A").is_ok());
-    assert_eq!(art.lookup("A"), None);
-    
-    assert_eq!(art.lookup("AB"), Some(&4));
-    assert!(art.delete("AB").is_ok());
-    assert_eq!(art.lookup("AB"), None);
-
-    assert_eq!(art.lookup("ABC"), Some(&3));
-    assert!(art.delete("ABC").is_ok());
-    assert_eq!(art.lookup("ABC"), None);
-    
-    assert_eq!(art.lookup("ABCD"), Some(&2));
-    assert!(art.delete("ABCD").is_ok());
-    assert_eq!(art.lookup("ABCD"), None);
-
-    assert_eq!(art.lookup("ABCDE"), Some(&1));
-    assert!(art.delete("ABCDE").is_ok());
-    assert_eq!(art.lookup("ABCDE"), None);
 }
 
 #[test]

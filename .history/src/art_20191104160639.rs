@@ -186,9 +186,13 @@ impl<V> Art<V> {
                     },
                 } 
             }
-            if key.peek() == None || header.key().len() > length {
-                break;
-            }
+            match key.peek() {
+                None => None,
+                Some(val) => {}
+                }
+            // if key.peek().is_none() || header.key().len() < length {
+            //     break;
+            // }
             if b.is_right() { //key is not fully matched and it is leaf
                 break;
             }

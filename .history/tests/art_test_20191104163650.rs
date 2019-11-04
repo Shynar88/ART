@@ -80,55 +80,55 @@ fn regression_delete_after_enlarge() {
     assert_eq!(art.lookup("ABCDE"), None);
 }
 
-#[test]
-fn stress() {
-    let ops = [
-        Ops::LookupSome,
-        Ops::LookupNone,
-        Ops::Insert,
-        Ops::DeleteSome,
-        Ops::DeleteNone,
-    ];
-    let mut rng = thread_rng();
-    let mut art = Art::new();
-    let mut hashmap = HashMap::<String, usize>::new();
+// #[test]
+// fn stress() {
+//     let ops = [
+//         Ops::LookupSome,
+//         Ops::LookupNone,
+//         Ops::Insert,
+//         Ops::DeleteSome,
+//         Ops::DeleteNone,
+//     ];
+//     let mut rng = thread_rng();
+//     let mut art = Art::new();
+//     let mut hashmap = HashMap::<String, usize>::new();
 
-    const OPS: usize = 4096 * 4096;
+//     const OPS: usize = 4096 * 4096;
 
-    for i in 0..OPS {
-        let op = ops.choose(&mut rng).unwrap();
+//     for i in 0..OPS {
+//         let op = ops.choose(&mut rng).unwrap();
 
-        match op {
-            Ops::LookupSome => {
-                if let Some(key) = hashmap.keys().choose(&mut rng) {
-                    println!("iteration {}: lookup({:?}) (existing)", i, key);
-                    assert_eq!(art.lookup(key), hashmap.get(key));
-                }
-            }
-            Ops::LookupNone => {
-                let key = generate_random_string(&mut rng);
-                println!("iteration {}: lookup({:?}) (non-existing)", i, key);
-                assert_eq!(art.lookup(&key), hashmap.get(&key));
-            }
-            Ops::Insert => {
-                let key = generate_random_string(&mut rng);
-                let value = rng.gen::<usize>();
-                println!("iteration {}: insert({:?}, {})", i, key, value);
-                let _ = art.insert(&key, value);
-                hashmap.entry(key).or_insert(value);
-            }
-            Ops::DeleteSome => {
-                let key = hashmap.keys().choose(&mut rng).map(|k| k.clone());
-                if let Some(key) = key {
-                    println!("iteration {}: delete({:?}) (existing)", i, key);
-                    assert_eq!(art.delete(&key), hashmap.remove(&key).ok_or(()));
-                }
-            }
-            Ops::DeleteNone => {
-                let key = generate_random_string(&mut rng);
-                println!("iteration {}: delete({:?}) (non-existing)", i, key);
-                assert_eq!(art.delete(&key), hashmap.remove(&key).ok_or(()));
-            }
-        }
-    }
-}
+//         match op {
+//             Ops::LookupSome => {
+//                 if let Some(key) = hashmap.keys().choose(&mut rng) {
+//                     println!("iteration {}: lookup({:?}) (existing)", i, key);
+//                     assert_eq!(art.lookup(key), hashmap.get(key));
+//                 }
+//             }
+//             Ops::LookupNone => {
+//                 let key = generate_random_string(&mut rng);
+//                 println!("iteration {}: lookup({:?}) (non-existing)", i, key);
+//                 assert_eq!(art.lookup(&key), hashmap.get(&key));
+//             }
+//             Ops::Insert => {
+//                 let key = generate_random_string(&mut rng);
+//                 let value = rng.gen::<usize>();
+//                 println!("iteration {}: insert({:?}, {})", i, key, value);
+//                 let _ = art.insert(&key, value);
+//                 hashmap.entry(key).or_insert(value);
+//             }
+//             Ops::DeleteSome => {
+//                 let key = hashmap.keys().choose(&mut rng).map(|k| k.clone());
+//                 if let Some(key) = key {
+//                     println!("iteration {}: delete({:?}) (existing)", i, key);
+//                     assert_eq!(art.delete(&key), hashmap.remove(&key).ok_or(()));
+//                 }
+//             }
+//             Ops::DeleteNone => {
+//                 let key = generate_random_string(&mut rng);
+//                 println!("iteration {}: delete({:?}) (non-existing)", i, key);
+//                 assert_eq!(art.delete(&key), hashmap.remove(&key).ok_or(()));
+//             }
+//         }
+//     }
+// }

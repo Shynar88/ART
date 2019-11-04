@@ -172,9 +172,7 @@ impl<V> Art<V> {
             length = 0; //resetting variable
             for i in 0..header.key().len() {
                 match key.peek(){
-                    None => {
-                        break;
-                        },
+                    None => {break},
                     Some(v) => {
                         if *v == header.key()[i] {
                             key.next();
@@ -186,7 +184,7 @@ impl<V> Art<V> {
                     },
                 } 
             }
-            if key.peek() == None || header.key().len() > length {
+            if key.peek() == None || header.key().len() < length {
                 break;
             }
             if b.is_right() { //key is not fully matched and it is leaf
