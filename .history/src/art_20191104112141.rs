@@ -54,7 +54,6 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
         if self.cursor.length != (header.length() as u8) {
             // create header with common part
             let new_header = NodeHeader::new(&header.key()[0..usize::from(self.cursor.length)]).unwrap();
-            let nh_key = new_header.key()[0];
             // shrink key of existing node
             header.shrink_key(self.cursor.length);
             //create node with common key part of child and input key newi
@@ -65,7 +64,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
             // update common newly created box to point to old child
             new_box.deref_mut().unwrap().1.left().unwrap().update(header.key()[0], prev_child).ok().unwrap();
             //update parent pointer to point to common newly created node
-            parent.deref_mut().unwrap().1.left().unwrap().update(nh_key, new_box);
+            parent.deref_mut().unwrap().1.left().unwrap().update(new_header.key()[0], new_box);
             Ok(unsafe{&mut *(node_body_v as *const _ as *mut V)})
         } else { //no path expansion, just attach
             // let (header, b) = self.cursor.child.deref_mut().unwrap();
@@ -118,12 +117,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     /// Returns `Ok(v)` if the entry contains a value, `v`; `Err(())` if the entry does not contain
     /// a value.
     pub fn delete(mut self) -> Result<V, ()> {
-        // the value is not in the tree
-        if self.key.peek() != None {
-            return Err(());
-        }
-        let deleted_child = self.cursor.parent.unwrap().deref_mut().unwrap().1.left().unwrap().delete(self.cursor.index).ok().unwrap();
-        Ok(deleted_child.into_value()) // should be called on cursor.child which should be leaf; into_value handles dropping the leaf
+        unimplemented!()
     }
 
     /// Lookups the entry's value.

@@ -44,7 +44,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     {
         if self.key.peek() == None {
             let val = self.cursor.child.deref_mut().unwrap().1.right().unwrap();
-            return Err((val, f));
+            Err((val, f))
         }
         let (header, b) = self.cursor.child.deref_mut().unwrap();
         let f_key = *self.key.peek().unwrap();
@@ -54,19 +54,13 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
         if self.cursor.length != (header.length() as u8) {
             // create header with common part
             let new_header = NodeHeader::new(&header.key()[0..usize::from(self.cursor.length)]).unwrap();
-            let nh_key = new_header.key()[0];
             // shrink key of existing node
             header.shrink_key(self.cursor.length);
             //create node with common key part of child and input key newi
-            let mut new_box = NodeBox::newi(new_header, vec![(f_key, node_box)], 0);
+            // let parent = Self::newi(NodeHeader::new(chunk).unwrap(), vec![(key, node)], 0);
+            let new_box = NodeBox::newi(new_header, vec![(key, node)], 0);
             //remove previous pointer in parent to child: delete
-            let mut parent = self.cursor.parent.unwrap();
-            let prev_child = parent.deref_mut().unwrap().1.left().unwrap().delete(self.cursor.index).ok().unwrap();
-            // update common newly created box to point to old child
-            new_box.deref_mut().unwrap().1.left().unwrap().update(header.key()[0], prev_child).ok().unwrap();
             //update parent pointer to point to common newly created node
-            parent.deref_mut().unwrap().1.left().unwrap().update(nh_key, new_box);
-            Ok(unsafe{&mut *(node_body_v as *const _ as *mut V)})
         } else { //no path expansion, just attach
             // let (header, b) = self.cursor.child.deref_mut().unwrap();
             let body = b.left().unwrap();
@@ -77,18 +71,25 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
                 },
                 Err(node) => {
                     // need to enlarge node
-                    let mut children = body.extract_children();
+                    let children = body.extract_children();
                     children.push((f_key, node));
                     let new_header = NodeHeader::new(&header.key()).unwrap();
                     let new_box = NodeBox::newi(new_header, children, 0);
+
+                    // let (n_h, n_b) = new_box.deref_mut().unwrap();
+                    // let new_body = n_b.left().unwrap();
                     let (p_h, p_b) = self.cursor.parent.unwrap().deref_mut().unwrap();
                     let parent_body = p_b.left().unwrap();
-                    let old_box = parent_body.update(header.key()[0], new_box).ok().unwrap(); //insertion, reference in parent update
-                    drop(old_box);
+                    let old_box = parent_body.update(f_key, new_box); //insertion
+                    // parent_body.delete(self.cursor.index);
+                    // parent_body.update(f_key, new_box);//reference in parent update 
                     Ok(unsafe{&mut *(node_body_v as *const _ as *mut V)})
                 },
             }
+            // Err((self.cursor.child.deref_mut().unwrap().1.right().unwrap(), f))
+            // Err((,f)) cursor.child.1.right.unwrap if key.peek is none
         }
+        unimplemented!()
     }
 
     /// Inserts the given value if the entry is vacant.
@@ -118,12 +119,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     /// Returns `Ok(v)` if the entry contains a value, `v`; `Err(())` if the entry does not contain
     /// a value.
     pub fn delete(mut self) -> Result<V, ()> {
-        // the value is not in the tree
-        if self.key.peek() != None {
-            return Err(());
-        }
-        let deleted_child = self.cursor.parent.unwrap().deref_mut().unwrap().1.left().unwrap().delete(self.cursor.index).ok().unwrap();
-        Ok(deleted_child.into_value()) // should be called on cursor.child which should be leaf; into_value handles dropping the leaf
+        unimplemented!()
     }
 
     /// Lookups the entry's value.

@@ -118,12 +118,8 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
     /// Returns `Ok(v)` if the entry contains a value, `v`; `Err(())` if the entry does not contain
     /// a value.
     pub fn delete(mut self) -> Result<V, ()> {
-        // the value is not in the tree
-        if self.key.peek() != None {
-            return Err(());
-        }
-        let deleted_child = self.cursor.parent.unwrap().deref_mut().unwrap().1.left().unwrap().delete(self.cursor.index).ok().unwrap();
-        Ok(deleted_child.into_value()) // should be called on cursor.child which should be leaf; into_value handles dropping the leaf
+        //(1) copy the value in the tree, (2) forget about the value in the tree, and (3) return the copied value.
+        
     }
 
     /// Lookups the entry's value.

@@ -122,8 +122,8 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
         if self.key.peek() != None {
             return Err(());
         }
-        let deleted_child = self.cursor.parent.unwrap().deref_mut().unwrap().1.left().unwrap().delete(self.cursor.index).ok().unwrap();
-        Ok(deleted_child.into_value()) // should be called on cursor.child which should be leaf; into_value handles dropping the leaf
+
+        Ok(self.cursor.child.into_value()) // should be called on cursor. child which should be leaf 
     }
 
     /// Lookups the entry's value.
