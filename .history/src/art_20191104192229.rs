@@ -60,12 +60,12 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
             //create node with common key part of child and input key newi
             let mut new_box = NodeBox::newi(new_header, vec![(f_key, node_box)], 0);
             //remove previous pointer in parent to child: delete
-            let mut parent = self.cursor.parent.unwrap();
+            let parent = self.cursor.parent.unwrap();
             let prev_child = parent.deref_mut().unwrap().1.left().unwrap().delete(self.cursor.index).ok().unwrap();
             // update common newly created box to point to old child
             new_box.deref_mut().unwrap().1.left().unwrap().update(header.key()[0], prev_child).ok().unwrap();
             //update parent pointer to point to common newly created node
-            parent.deref_mut().unwrap().1.left().unwrap().update(nh_key, new_box);
+            parent.deref_mut().unwrap().1.left().unwrap().update(nh_key, new_box).ok().unwrap();
             Ok(unsafe{&mut *(node_body_v as *const _ as *mut V)})
         } else { //no path expansion, just attach
             // let (header, b) = self.cursor.child.deref_mut().unwrap();

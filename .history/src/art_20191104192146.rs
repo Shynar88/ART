@@ -65,7 +65,7 @@ impl<'a, V, I: 'a + Iterator<Item = u8> + DoubleEndedIterator> Entry<'a, V, I> {
             // update common newly created box to point to old child
             new_box.deref_mut().unwrap().1.left().unwrap().update(header.key()[0], prev_child).ok().unwrap();
             //update parent pointer to point to common newly created node
-            parent.deref_mut().unwrap().1.left().unwrap().update(nh_key, new_box);
+            parent.deref_mut().unwrap().1.left().unwrap().update(nh_key, new_box).ok().unwrap();
             Ok(unsafe{&mut *(node_body_v as *const _ as *mut V)})
         } else { //no path expansion, just attach
             // let (header, b) = self.cursor.child.deref_mut().unwrap();
